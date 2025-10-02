@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Election Vote Contribution Sliders</title>
+    <!-- KaTeX for rendering the mathematical equation -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" xintegrity="sha384-n8MVd4RsNIU0KOVEMeaPoAbJNdMYGNpaMsfrY1OdeiLscqm8lIvRxGTO+RlJkO3E" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" xintegrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" xintegrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+        onload="renderMathInElement(document.body);"></script>
+
+    <style>
+        /* General page styling */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            margin: 0;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #343a40;
+        }
+        
+        /* Main container for sliders */
+        .sliders-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            width: 100%;
+            max-width: 2400px;
+            margin-bottom: 1rem;
+        }
+
+        /* Styling for each individual slider component */
+        .slider-component {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 300px;
+        }
+
+        .slider-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #495057;
+        }
+
+        /* --- STYLES FROM YOUR PROVIDED SLIDER HTML --- */
+        .container {
+            position: relative;
+            width: 100%; 
+            margin: 0;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            cursor: zoom-in; /* Add cursor to indicate it's clickable */
+        }
+        .image-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .image-wrapper img {
+            display: block;
+            width: 100%;
+            height: auto;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+            user-select: none;
+        }
+        .overlay img {
+            position: absolute;
+            top:0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            max-width: none;
+            object-fit: cover;
+            object-position: left;
+        }
+        .slider {
+            position: absolute;
+            top: 5%;
+            left: 50%;
+            width: 4px;
+            height: 90%;
+            background: grey;
+            cursor: ew-resize;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .slider::before {
+            content: '\2194'; /* Left-right arrow */
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* --- END OF YOUR SLIDER STYLES --- */
+
+
+        /* --- NEW EQUATION LAYOUT STYLES --- */
+        .full-equation-layout {
+            display: flex;
+            width: 100%;
+            max-width: 2400px;
+            align-items: stretch;
+        }
+
+        .equation-baseline {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-right: 1rem;
+        }
+
+        .equation-components-container {
+            flex: 1;
+            display: flex;
+            gap: 2rem;
+            align-items: stretch;
+        }
+        /* --- END NEW STYLES --- */
+
+
+        /* Equation section styling */
+        .equation-term {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            background-color: #ffffff;
+        }
+        .equation-label {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #495057;
+        }
+        .katex-display {
+            margin: 0 !important;
+            font-size: 1.3rem;
+        }
+        .equation-equals, .equation-plus {
+            font-size: 2.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* --- MODAL STYLES --- */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.85);
+            padding-top: 50px;
+        }
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 85%;
+            max-width: 1600px;
+        }
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .close-modal:hover,
+        .close-modal:focus {
+            color: #bbb;
+            text-decoration: none;
+        }
+        /* --- END MODAL STYLES --- */
+
+
+        /* Responsive design */
+        @media (max-width: 900px) {
+            .sliders-container, .full-equation-layout, .equation-components-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Visualizing Vote Contributions: County vs. Block Group</h1>
+
+    <div class="sliders-container">
+        
+        <!-- Slider 1: Context -->
+        <div class="slider-component">
+            <div class="slider-title">Contribution due to Context</div>
+            <div class="container" id="context-container">
+                <div class="image-wrapper">
+                    <img src="contribution_maps/B_context_contribution_block_group.png" alt="After">
+                    <div class="overlay" id="context-overlay">
+                        <img src="contribution_maps/B_context_contribution_county_2020.png" alt="Before">
+                    </div>
+                    <div class="slider" id="context-slider-handle"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slider 2: Population Mix -->
+        <div class="slider-component">
+            <div class="slider-title">Contribution due to Population Mix</div>
+            <div class="container" id="popmix-container">
+                <div class="image-wrapper">
+                    <img src="contribution_maps/C_population_mix_contribution_block_group.png" alt="After">
+                    <div class="overlay" id="popmix-overlay">
+                        <img src="contribution_maps/C_population_mix_contribution_county_2020.png" alt="Before">
+                    </div>
+                    <div class="slider" id="popmix-slider-handle"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Equation Layout -->
+    <div class="full-equation-layout">
+        <div class="equation-baseline">
+             <div style="font-size: 2.5rem;">`y_i \ = \ \bar{y}`</div>
+        </div>
+        <div class="equation-plus">+</div>
+        <div class="equation-components-container">
+             <div class="equation-term">
+                <div class="equation-label">Contribution due to Context</div>
+                <div>`\alpha_i \sigma_y`</div>
+            </div>
+            <div class="equation-plus">+</div>
+            <div class="equation-term">
+                <div class="equation-label">Contribution due to Population Mix</div>
+                <div>`\sigma_y \sum_{j} \beta_{ij} (x_{ij} - \bar{x}_j) / \sigma_{x_j}`</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+        <span class="close-modal">&times;</span>
+        <div class="modal-content" id="modal-content-container">
+            <!-- The cloned slider will be injected here by JavaScript -->
+        </div>
+    </div>
+
+
+    <script>
+        // Reusable function to initialize a slider.
+        function initSlider(container, overlay, slider) {
+            let isDragging = false;
+            
+            slider.addEventListener("mousedown", () => isDragging = true);
+            document.addEventListener("mouseup", () => isDragging = false);
+            document.addEventListener("mousemove", (e) => {
+                if (!isDragging) return;
+                let rect = container.getBoundingClientRect();
+                let offsetX = e.clientX - rect.left;
+                let percentage = (offsetX / rect.width) * 100;
+                percentage = Math.max(0, Math.min(100, percentage));
+                overlay.style.width = percentage + "%";
+                slider.style.left = percentage + "%";
+            });
+
+            // Touch support
+            slider.addEventListener("touchstart", (e) => { isDragging = true; e.preventDefault(); });
+            document.addEventListener("touchend", () => isDragging = false);
+            document.addEventListener("touchmove", (e) => {
+                if (!isDragging) return;
+                let touch = e.touches[0];
+                let rect = container.getBoundingClientRect();
+                let offsetX = touch.clientX - rect.left;
+                let percentage = (offsetX / rect.width) * 100;
+                percentage = Math.max(0, Math.min(100, percentage));
+                overlay.style.width = percentage + "%";
+                slider.style.left = percentage + "%";
+            });
+        }
+
+        // Initialize the main sliders
+        initSlider(
+            document.getElementById('context-container'), 
+            document.getElementById('context-overlay'), 
+            document.getElementById('context-slider-handle')
+        );
+        initSlider(
+            document.getElementById('popmix-container'), 
+            document.getElementById('popmix-overlay'), 
+            document.getElementById('popmix-slider-handle')
+        );
+
+        // --- MODAL LOGIC ---
+        const modal = document.getElementById("myModal");
+        const modalContentContainer = document.getElementById("modal-content-container");
+        const closeModalBtn = document.querySelector(".close-modal");
+        
+        const contextSliderComponent = document.getElementById("context-container");
+        const popmixSliderComponent = document.getElementById("popmix-container");
+
+        function openModal(sliderElement) {
+            // Clone the original slider's HTML and put it in the modal
+            const clonedSlider = sliderElement.cloneNode(true);
+            clonedSlider.id = "modal-cloned-slider"; // Give it a new ID
+            modalContentContainer.innerHTML = ''; // Clear previous content
+            modalContentContainer.appendChild(clonedSlider);
+
+            // Now, initialize the slider functionality ON THE CLONED elements
+            const modalContainer = modalContentContainer.querySelector('.container');
+            const modalOverlay = modalContentContainer.querySelector('.overlay');
+            const modalSliderHandle = modalContentContainer.querySelector('.slider');
+            
+            initSlider(modalContainer, modalOverlay, modalSliderHandle);
+            
+            modal.style.display = "block";
+        }
+
+        function closeModal() {
+            modal.style.display = "none";
+            modalContentContainer.innerHTML = ''; // Clean up for next time
+        }
+
+        // Event listeners
+        contextSliderComponent.addEventListener('click', () => openModal(contextSliderComponent));
+        popmixSliderComponent.addEventListener('click', () => openModal(popmixSliderComponent));
+        closeModalBtn.addEventListener('click', closeModal);
+        
+        // Also close if user clicks outside of the modal content
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+
+        // Render the math after the page loads
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "`", right: "`", display: true}
+                ]
+            });
+        });
+    </script>
+
+</body>
+</html>
+
